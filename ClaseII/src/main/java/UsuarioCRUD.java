@@ -1,0 +1,100 @@
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+public class UsuarioCRUD {
+    private Connection connection;
+
+    public UsuarioCRUD(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void crearUsuario(String nom_usua, String ape_usua, String usr_usua, String cla_usua, Date fna_usua, int idtipo, int est_usua) throws SQLException {
+        String sql = "INSERT INTO tb_usuarios (nom_usua, ape_usua, usr_usua, cla_usua, fna_usua, idtipo, est_usua) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, nom_usua);
+            statement.setString(2, ape_usua);
+            statement.setString(3, usr_usua);
+            statement.setString(4, cla_usua);
+            statement.setDate(5, fna_usua);
+            statement.setInt(6, idtipo);
+            statement.setInt(7, est_usua);
+            statement.executeUpdate();
+        }
+    }
+
+    public Usuario leerUsuario(int cod_usua) throws SQLException {
+        String sql = "SELECT * FROM tb_usuarios WHERE cod_usua = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, cod_usua);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return mapearUsuario(resultSet);
+                }
+            }
+        }
+        return null;
+    }
+
+    public List<Usuario> leerTodosLosUsuarios() throws SQLException {
+        List<Usuario> usuarios = new ArrayList<>();
+        String sql = "SELECT * FROM tb_usuarios";
+        try (PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+            while (resultSet.next()) {
+                usuarios.add(mapearUsuario(resultSet));
+            }
+        }
+        return usuarios;
+    }
+
+    public void actualizarUsuario(Usuario usuario) throws SQLException {
+        String sql = "UPDATE tb_usuarios SET nom_usua = ?, ape_usua = ?, usr_usua = ?, cla_usua = ?, fna_usua = ?, idtipo = ?, est_usua = ? WHERE cod_usua = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, usuario.getNom_usua());
+            statement.setString(2, usuario.getApe_usua());
+            statement.setString(3, usuario.getUsr_usua());
+            statement.setString(4, usuario.getCla_usua());
+            statement.setDate(5, usuario.getFna_usua());
+            statement.setInt(6, usuario.getIdtipo());
+            statement.setInt(7, usuario.getEst_usua());
+            statement.setInt(8, usuario.getCod_usua());
+            statement.executeUpdate();
+        }
+    }
+
+    public void eliminarUsuario(int cod_usua) throws SQLException {
+        String sql = "DELETE FROM tb_usuarios WHERE cod_usua = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, cod_usua);
+            statement.executeUpdate();
+        }
+    }
+
+    private Usuario mapearUsuario(ResultSet resultSet) throws SQLException {
+        Usuario usuario = new Usuario();
+        usuario.setCod_usua(resultSet.getInt("cod_usua"));
+        usuario.setNom_usua(resultSet.getString("nom_usua"));
+        usuario.setApe_usua(resultSet.getString("ape_usua"));
+        usuario.setUsr_usua(resultSet.getString("usr_usua"));
+        usuario.setCla_usua(resultSet.getString("cla_usua"));
+        usuario.setFna_usua(resultSet.getDate("fna_usua"));
+        usuario.setIdtipo(resultSet.getInt("idtipo"));
+        usuario.setEst_usua(resultSet.getInt("est_usua"));
+        return usuario;
+    }
+
+    public void cerrarConexion() {
+        try {
+            if (connection != null) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}

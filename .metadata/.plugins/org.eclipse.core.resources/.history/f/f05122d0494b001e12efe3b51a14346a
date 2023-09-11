@@ -1,0 +1,21 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class Main {
+    public static void main(String[] args) {
+        String url = "jdbc:mysql://localhost:3306/tu_base_de_datos";
+        String usuario = "tu_usuario";
+        String contraseña = "tu_contraseña";
+
+        try {
+            Connection connection = DriverManager.getConnection(url, usuario, contraseña);
+            // Ahora tienes una conexión a la base de datos que puedes usar para realizar consultas.
+            // ...
+            // No olvides cerrar la conexión cuando hayas terminado.
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
